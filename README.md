@@ -94,7 +94,7 @@ GameLive 是一个软件工程课程设计项目，模拟主流游戏直播平�
 ### 1. 克隆仓库
 
 ```bash
-git clone <仓库地址>
+git clone https://github.com/ikun-ai-liguan/GameLive.git
 cd GameLive
 ```
 
