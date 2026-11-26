@@ -2,6 +2,16 @@
 
 > 一个基于 Vue3 + SpringBoot 前后端分离的游戏直播平台，支持 RTMP 推流、FLV 拉流播放、WebSocket 实时弹幕与后台管理。
 
+## 🔗 仓库地址（Git 仓库信息）
+
+- **仓库地址 / Repository URL**：https://github.com/ikun-ai-liguan/GameLive
+- **克隆地址 / Clone URL (HTTPS)**：https://github.com/ikun-ai-liguan/GameLive.git
+- **克隆地址 / Clone URL (SSH)**：git@github.com:ikun-ai-liguan/GameLive.git
+- **默认分支 / Default Branch**：main
+- **开源协议 / License**：MIT
+
+> 若飞书文档 / 统计工具读取「git 仓库」列，请填写：`https://github.com/ikun-ai-liguan/GameLive.git`
+
 ## 📖 项目简介
 
 GameLive 是一个软件工程课程设计项目，模拟主流游戏直播平台的核心业务：主播通过 RTMP 推流开播，观众在直播间观看直播、发送弹幕、点赞与打赏，平台管理员对用户、直播间和游戏分类进行审核与管理。
