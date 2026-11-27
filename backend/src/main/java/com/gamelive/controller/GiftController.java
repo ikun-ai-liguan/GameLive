@@ -1,6 +1,7 @@
 package com.gamelive.controller;
 
 import com.gamelive.common.Result;
+import com.gamelive.config.AuthContext;
 import com.gamelive.dto.GiftSendRequest;
 import com.gamelive.entity.Gift;
 import com.gamelive.service.GiftService;
@@ -9,7 +10,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -31,9 +31,8 @@ public class GiftController {
     }
 
     @PostMapping("/send")
-    public Result<Void> send(@RequestHeader(value = "X-User-Id", required = false) Long fromUserId,
-                             @Valid @RequestBody GiftSendRequest request) {
-        giftService.sendGift(request, fromUserId);
+    public Result<Void> send(@Valid @RequestBody GiftSendRequest request) {
+        giftService.sendGift(request, AuthContext.getUserId());
         return Result.success();
     }
 }

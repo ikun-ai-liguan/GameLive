@@ -9,10 +9,10 @@ import java.util.List;
 
 public interface UserService {
 
-    /** 注册 */
+    /** 注册（密码 BCrypt 加密存储） */
     void register(RegisterRequest request);
 
-    /** 登录，返回登录令牌（骨架阶段返回模拟 token） */
+    /** 登录，返回 JWT */
     String login(LoginRequest request);
 
     /** 查询当前用户信息 */
@@ -29,4 +29,7 @@ public interface UserService {
 
     /** 主播的粉丝列表 */
     List<User> listFans(Long anchorId);
+
+    /** 当前用户关注的主播列表 */
+    List<User> listFollows(Long userId);
 }

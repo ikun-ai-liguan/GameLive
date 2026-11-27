@@ -2,6 +2,7 @@ package com.gamelive.controller;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.gamelive.common.Result;
+import com.gamelive.config.AuthContext;
 import com.gamelive.dto.RoomCreateRequest;
 import com.gamelive.entity.LiveRoom;
 import com.gamelive.service.LiveRoomService;
@@ -11,7 +12,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -44,9 +44,8 @@ public class LiveRoomController {
 
     /** 主播创建直播间（自动生成推流密钥） */
     @PostMapping
-    public Result<LiveRoom> create(@RequestHeader(value = "X-User-Id", required = false) Long anchorId,
-                                  @Valid @RequestBody RoomCreateRequest request) {
-        return Result.success(liveRoomService.createRoom(anchorId, request));
+    public Result<LiveRoom> create(@Valid @RequestBody RoomCreateRequest request) {
+        return Result.success(liveRoomService.createRoom(AuthContext.getUserId(), request));
     }
 
     @PostMapping("/{id}/start")

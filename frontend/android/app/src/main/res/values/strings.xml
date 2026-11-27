@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">GameLive</string>
+    <string name="title_activity_main">GameLive</string>
+    <string name="package_name">com.gamelive.app</string>
+    <string name="custom_url_scheme">com.gamelive.app</string>
+</resources>

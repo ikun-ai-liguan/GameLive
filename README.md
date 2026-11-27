@@ -16,6 +16,8 @@
 
 GameLive 是一个软件工程课程设计项目，模拟主流游戏直播平台的核心业务：主播通过 RTMP 推流开播，观众在直播间观看直播、发送弹幕、点赞与打赏，平台管理员对用户、直播间和游戏分类进行审核与管理。
 
+**v1.1 升级版** 在原有骨架基础上补齐了真实 JWT 鉴权、BCrypt 加密、运行时可配置服务端地址、移动端适配、常见直播 App 功能（点赞 / 观看历史 / 关注 / 礼物榜 / 举报 / 通知 / 排行榜）、Docker 一键部署（含 SRS 流媒体），并支持通过 Capacitor 打包为原生安卓 APK。
+
 ## ✨ 功能预览
 
 ### 游客
@@ -25,11 +27,13 @@ GameLive 是一个软件工程课程设计项目，模拟主流游戏直播平�
 - 进入直播间观看直播回放
 
 ### 普通观众
-- 注册、登录，修改个人信息
-- 关注主播，查看粉丝列表
-- 直播间实时观看
-- 发送弹幕、点赞、赠送礼物打赏
-- 查看主播信息与粉丝列表
+- 注册、登录（JWT 鉴权、密码 BCrypt 加密），修改个人信息
+- 关注主播，查看关注列表与粉丝列表
+- 直播间实时观看（HTTP-FLV / 回放，断线自动重连弹幕）
+- 发送弹幕、点赞（状态同步）、赠送礼物打赏
+- 观看历史、礼物排行榜、热门直播榜
+- 站内通知、举报违规直播间
+- 在 App「设置」页随时切换后端服务器地址，无需重新打包
 
 ### 主播
 - 申请开播，系统自动生成 RTMP 推流地址
@@ -57,6 +61,10 @@ GameLive 是一个软件工程课程设计项目，模拟主流游戏直播平�
 | 数据库 | MySQL 8.0 | 业务数据存储 |
 | 缓存 | Redis（可选） | 会话、热门数据缓存 |
 | 直播方案 | RTMP 推流 + FLV 拉流 | OBS 等推流端推流，浏览器 FLV.js 播放 |
+| 安全 | JWT (jjwt) + BCrypt | 登录令牌鉴权、密码加密存储 |
+| API 文档 | Springdoc OpenAPI | `/api/swagger-ui.html` 在线接口文档 |
+| 容器化 | Docker Compose + SRS | 一键启动 MySQL / Redis / 流媒体 / 后端 |
+| 安卓打包 | Capacitor 6 | Vue 前端封装为原生 APK |
 
 ## 🧩 项目架构说明
 
@@ -84,6 +92,31 @@ GameLive 是一个软件工程课程设计项目，模拟主流游戏直播平�
 - **后端**：按业务划分为用户、直播、互动、管理四大模块，统一返回 JSON 结构。
 - **数据层**：MyBatis-Plus 操作 MySQL；Redis 可选，用于登录态、热门直播间等缓存。
 - **直播链路**：主播使用 OBS 等工具按系统生成的 RTMP 地址推流，前端通过 FLV.js 拉取可播放的 FLV 流。
+
+## 📱 安卓 App（Capacitor）
+
+前端已接入 Capacitor，可打包为原生 APK。详细说明见 [APK_BUILD.md](./APK_BUILD.md)。
+
+```bash
+cd frontend
+npm install
+npm run build
+npx cap add android      # 首次执行
+npx cap sync android
+```
+
+- **云端打包（推荐）**：在 GitHub 仓库手动运行 `Build Android APK` 工作流，或推送 `v*` 标签自动触发，完成后从 Actions 下载 `GameLive-debug.apk`。
+- **本地打包**：用 Android Studio 打开 `frontend/android`，Gradle 同步后 Build APK。
+- **手机连电脑后端**：App 内「设置 → 服务器地址」填写电脑的局域网 IP（例如 `http://192.168.1.100:8080/api`）；`localhost` 在手机里指向手机自身，不能用。详见 APK_BUILD.md。
+
+## 🐳 Docker 一键部署
+
+```bash
+cp .env.example .env      # 按需修改数据库密码与 JWT_SECRET
+docker compose up -d
+```
+
+启动后：后端 `http://<服务器IP>:8080/api`，Swagger 文档 `http://<服务器IP>:8080/api/swagger-ui.html`，HTTP-FLV `http://<服务器IP>:8081/live/`，RTMP `rtmp://<服务器IP>:1935/live/`。首次启动请导入 `backend/src/main/resources/sql/gamelive.sql`。
 
 ## 📌 环境依赖
 
@@ -216,12 +249,20 @@ frontend/
 - **角色权限控制**：区分游客、观众、主播、管理员四类角色，按角色控制接口与页面访问。
 - **关注 / 粉丝关系**：维护主播与观众之间的关注关系及粉丝列表。
 
+### v1.1 已补充
+
+- 真实 JWT 鉴权与 BCrypt 密码加密（原骨架为明文密码 + 占位 token）。
+- 点赞、观看历史、关注列表、礼物榜、举报、站内通知等常见功能。
+- 运行时可配置服务端地址：手机 App 无需重新打包即可切换服务器。
+- Docker Compose 一键部署（MySQL / Redis / SRS 流媒体 / 后端）。
+- Springdoc OpenAPI 接口文档与 Actuator 健康检查。
+- Capacitor 安卓打包与 GitHub Actions 云端 APK 构建。
+
 ### 待优化点
 
-- 直播流目前依赖独立流媒体服务，可进一步集成 SRS / Nginx-RTMP 并补充 HLS 低延迟方案。
 - 礼物打赏目前为模拟数据，可接入真实支付与流水对账。
 - 弹幕高并发场景下可引入消息队列（如 Redis Pub/Sub 或 RabbitMQ）做异步削峰。
-- 补充单元测试、接口文档（Swagger / Knife4j）与部署脚本（Docker Compose）。
+- 可补充 HLS 低延迟方案与单元测试。
 - 增加直播回放转存、弹幕录像回放联动等功能。
 
 ## 📄 许可证

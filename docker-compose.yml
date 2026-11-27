@@ -1,0 +1,65 @@
+# 使用方式：cp .env.example .env 后执行 docker compose up -d --build
+# 可选 Redis：docker compose --profile cache up -d
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: gamelive-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASS:-root}
+      MYSQL_DATABASE: ${DB_NAME:-gamelive}
+      TZ: Asia/Shanghai
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./backend/src/main/resources/sql/gamelive.sql:/docker-entrypoint-initdb.d/gamelive.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p$$MYSQL_ROOT_PASSWORD --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+
+  redis:
+    image: redis:7-alpine
+    container_name: gamelive-redis
+    restart: unless-stopped
+    profiles: ["cache"]
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+
+  srs:
+    image: ossrs/srs:5
+    container_name: gamelive-srs
+    restart: unless-stopped
+    ports:
+      - "1935:1935"   # RTMP 推流
+      - "8081:8081"   # HTTP-FLV 拉流
+    volumes:
+      - ./docker/srs.conf:/usr/local/srs/conf/srs.conf:ro
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: gamelive-backend
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DB_HOST: mysql
+      DB_PORT: 3306
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+    ports:
+      - "8080:8080"
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+volumes:
+  mysql-data:
+  redis-data:

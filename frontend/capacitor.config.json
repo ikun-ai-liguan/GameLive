@@ -1,0 +1,12 @@
+{
+  "appId": "com.gamelive.app",
+  "appName": "GameLive",
+  "webDir": "dist",
+  "android": {
+    "allowMixedContent": true
+  },
+  "server": {
+    "androidScheme": "https"
+  },
+  "plugins": {}
+}

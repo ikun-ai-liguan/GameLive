@@ -6,6 +6,11 @@ const routes = [
   { path: '/register', name: 'Register', component: () => import('@/views/RegisterView.vue') },
   { path: '/room/:id', name: 'LiveRoom', component: () => import('@/views/LiveRoomView.vue') },
   { path: '/profile', name: 'Profile', component: () => import('@/views/ProfileView.vue') },
+  { path: '/follows', name: 'Follows', component: () => import('@/views/FollowView.vue') },
+  { path: '/history', name: 'History', component: () => import('@/views/HistoryView.vue') },
+  { path: '/ranking', name: 'Ranking', component: () => import('@/views/RankingView.vue') },
+  { path: '/notifications', name: 'Notifications', component: () => import('@/views/NotificationView.vue') },
+  { path: '/settings', name: 'Settings', component: () => import('@/views/SettingsView.vue') },
   { path: '/anchor', name: 'Anchor', component: () => import('@/views/AnchorView.vue') },
   { path: '/admin', name: 'Admin', component: () => import('@/views/AdminView.vue') }
 ]

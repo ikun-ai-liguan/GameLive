@@ -11,9 +11,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.HashMap;
-import java.util.Map;
-
 /**
  * 注册 / 登录。
  */
@@ -30,11 +27,9 @@ public class AuthController {
         return Result.success();
     }
 
+    /** 登录成功直接返回 JWT 字符串，前端以 Authorization: Bearer &lt;token&gt; 携带 */
     @PostMapping("/login")
-    public Result<Map<String, Object>> login(@Valid @RequestBody LoginRequest request) {
-        String token = userService.login(request);
-        Map<String, Object> data = new HashMap<>();
-        data.put("token", token);
-        return Result.success(data);
+    public Result<String> login(@Valid @RequestBody LoginRequest request) {
+        return Result.success(userService.login(request));
     }
 }

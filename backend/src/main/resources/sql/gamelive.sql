@@ -157,6 +157,11 @@ VALUES
     ('anchor1','123456', '技术流主播', 'ANCHOR', 'NORMAL', NOW(), NOW()),
     ('viewer1','123456', '普通观众',   'USER',   'NORMAL', NOW(), NOW());
 
+-- 演示账号密码升级为 BCrypt 摘要（明文仍为 123456），以兼容真实登录校验
+UPDATE `user`
+SET `password` = '$2b$10$W1aYm4yDm3MVSGha7CfEG.xALvu97tmya2iMq2cCxrSBqAhw6kh2i'
+WHERE `username` IN ('admin', 'anchor1', 'viewer1');
+
 INSERT INTO `category` (`name`, `icon`, `sort`, `status`, `create_time`, `update_time`)
 VALUES
     ('英雄联盟', NULL, 1, 'ENABLE', NOW(), NOW()),
@@ -170,3 +175,64 @@ VALUES
     ('啤酒',   NULL, 1.00, 2),
     ('火箭',   NULL, 99.00, 3),
     ('嘉年华', NULL, 520.00, 4);
+
+-- =====================================================================
+-- 互动扩展表（可重复执行：CREATE TABLE IF NOT EXISTS）
+-- 说明：以上原有种子数据保持不动；新表不预置种子数据，避免产生脏演示记录。
+-- =====================================================================
+
+-- ---------------------------------------------------------------------
+-- 直播间点赞记录（每个用户对每个直播间仅一条）
+-- ---------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS `room_like` (
+    `id`          BIGINT    NOT NULL AUTO_INCREMENT,
+    `room_id`     BIGINT    NOT NULL COMMENT '直播间 ID',
+    `user_id`     BIGINT    NOT NULL COMMENT '点赞用户 ID',
+    `create_time` DATETIME  DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uk_room_like_user` (`room_id`, `user_id`),
+    KEY `idx_like_user` (`user_id`)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COMMENT = '直播间点赞记录表';
+
+-- ---------------------------------------------------------------------
+-- 观看历史（同一用户与直播间只保留最新一条）
+-- ---------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS `watch_history` (
+    `id`          BIGINT   NOT NULL AUTO_INCREMENT,
+    `user_id`     BIGINT   NOT NULL COMMENT '用户 ID',
+    `room_id`     BIGINT   NOT NULL COMMENT '直播间 ID',
+    `create_time` DATETIME DEFAULT NULL COMMENT '最近观看时间',
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uk_history_user_room` (`user_id`, `room_id`),
+    KEY `idx_history_time` (`create_time`)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COMMENT = '观看历史表';
+
+-- ---------------------------------------------------------------------
+-- 举报记录
+-- ---------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS `report` (
+    `id`          BIGINT       NOT NULL AUTO_INCREMENT,
+    `user_id`     BIGINT       NOT NULL COMMENT '举报人 ID',
+    `target_type` VARCHAR(10)  NOT NULL COMMENT 'ROOM-直播间 / DANMU-弹幕',
+    `target_id`   BIGINT       NOT NULL COMMENT '目标 ID',
+    `reason`      VARCHAR(255) NOT NULL COMMENT '举报原因',
+    `status`      VARCHAR(10)  NOT NULL DEFAULT 'PENDING' COMMENT 'PENDING-待处理 / RESOLVED-已处理 / REJECTED-驳回',
+    `create_time` DATETIME     DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    KEY `idx_report_user` (`user_id`),
+    KEY `idx_report_target` (`target_type`, `target_id`)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COMMENT = '举报记录表';
+
+-- ---------------------------------------------------------------------
+-- 站内通知
+-- ---------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS `notification` (
+    `id`          BIGINT       NOT NULL AUTO_INCREMENT,
+    `user_id`     BIGINT       NOT NULL COMMENT '接收用户 ID',
+    `title`       VARCHAR(100) NOT NULL COMMENT '通知标题',
+    `content`     VARCHAR(500) DEFAULT NULL COMMENT '通知内容',
+    `is_read`     TINYINT      NOT NULL DEFAULT 0 COMMENT '是否已读：0-否 1-是',
+    `create_time` DATETIME     DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    KEY `idx_notification_user` (`user_id`, `is_read`)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COMMENT = '站内通知表';

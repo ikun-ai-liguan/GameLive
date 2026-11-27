@@ -40,10 +40,9 @@ const submit = async () => {
   await formRef.value.validate()
   loading.value = true
   try {
-    const res = await login(form)
-    // TODO 登录成功后由后端返回用户信息；骨架阶段先保存 token
-    userStore.setUser({ token: res.token, userId: null, nickname: '观众' })
-    ElMessage.success('登录成功')
+    // login() 内部已规范化并保存 token / userId / nickname
+    await login(form)
+    ElMessage.success(`登录成功，欢迎回来 ${userStore.nickname || '观众'}`)
     router.push('/')
   } finally {
     loading.value = false
